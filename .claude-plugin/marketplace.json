@@ -1,0 +1,12 @@
+{
+  "name": "said-it-twice",
+  "owner": {"name": "Usama Dar"},
+  "plugins": [
+    {
+      "name": "said-it-twice",
+      "source": "./",
+      "description": "Turn repeated PR review feedback into proposed automated checks.",
+      "version": "0.1.0"
+    }
+  ]
+}

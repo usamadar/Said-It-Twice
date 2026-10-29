@@ -1,0 +1,22 @@
+--- a/config.py
++++ b/config.py
+@@ -4,2 +4,5 @@
+ def retries(value):
+-    return int(value)
++    count = int(value)
++    if count < 0:
++        raise ValueError("Retry count must be non-negative")
++    return count
+--- a/test_config.py
++++ b/test_config.py
+@@ -5,3 +5,10 @@
+ class ConfigTests(unittest.TestCase):
+     def test_positive_retry_count(self):
+         self.assertEqual(retries('3'), 3)
++
++    def test_rejects_negative_retry_count(self):
++        with self.assertRaises(ValueError):
++            retries("-1")
++
++    def test_accepts_zero_retry_count(self):
++        self.assertEqual(retries("0"), 0)
