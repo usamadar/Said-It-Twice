@@ -5,8 +5,8 @@
     {
       "name": "said-it-twice",
       "source": "./",
-      "description": "Turn repeated PR review feedback into proposed automated checks.",
-      "version": "0.1.0"
+      "description": "Turn repeated GitHub or GitLab review feedback into proposed automated checks.",
+      "version": "0.2.0"
     }
   ]
 }

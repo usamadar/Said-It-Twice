@@ -1,6 +1,6 @@
 ---
 description: Turn recurring review feedback into proposed automated checks
-argument-hint: "[--days 30] [--repo OWNER/REPO] [--fixture PATH --now ISO_TIMESTAMP]"
+argument-hint: "[--days 30] [--provider github|gitlab] [--hostname HOST] [--repo NAMESPACE/PROJECT] [--fixture PATH --now ISO_TIMESTAMP]"
 disable-model-invocation: true
 ---
 

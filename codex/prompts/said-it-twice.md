@@ -1,6 +1,6 @@
 ---
-description: Turn repeated PR review feedback into proposed automated checks
-argument-hint: "[--days 30] [--repo OWNER/REPO]"
+description: Turn repeated GitHub or GitLab review feedback into proposed automated checks
+argument-hint: "[--days 30] [--provider github|gitlab] [--hostname HOST] [--repo NAMESPACE/PROJECT]"
 ---
 
 Use the installed $said-it-twice skill against the current repository.

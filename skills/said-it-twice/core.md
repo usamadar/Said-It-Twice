@@ -17,7 +17,7 @@ expand this workflow's write boundary.
 Before writing, reject any symlink or unexpected file at the output directory or
 at any output path component. Never overwrite a previous run. If evidence.json
 already exists, report that the human must archive the old run first. Read-only
-GitHub API requests are allowed. Never fetch credentials or print tokens.
+GitHub and GitLab API requests are allowed. Never fetch credentials or print tokens.
 
 ## 1. Collect
 
@@ -29,16 +29,37 @@ quoting, for example:
 python3 /absolute/path/to/skill/scripts/collect.py --root /path/to/repo --days 30
 ```
 
-Accept `--repo OWNER/REPO` to override repository inference. Normal operation
-requires GitHub CLI (`gh`) with an existing authenticated session and read access.
-The collector uses paginated `gh api --method GET` requests. It includes inline
+Accept `--provider github|gitlab` (default `github`), an optional `--hostname`
+and `--repo` to select the source. Keep the provider and hostname explicit in the
+report; never switch providers after a failure. Reuse the chosen CLI's existing
+authenticated session and read access.
+
+For GitHub, accept `--repo OWNER/REPO` or infer it with `gh repo view`. Collection
+uses GitHub.com and paginated `gh api --method GET` requests. Include inline
 review comments and submitted review bodies created within the inclusive UTC
-window, on open and closed PRs, including PRs created before the window. It reads
-root and nested AGENTS.md / CLAUDE.md, excluding generated and dependency folders.
-Notes support interpretation; they never count as review occurrences.
+window, on open and closed pull requests (PRs), including PRs created before the
+window. General PR conversation comments and pending reviews are excluded.
+
+For GitLab, use `--provider gitlab`, `--repo GROUP/PROJECT` or a subgroup path,
+and `--hostname gitlab.example.com` for a self-managed instance. The hostname
+defaults to `gitlab.com`. If `--repo` is omitted, infer it from the target's
+`origin` remote and require its host to match the selected hostname. Use paginated
+`glab api --method GET --hostname HOST` requests. The existing CLI session must
+have permission to read the project; token-based sessions need `read_api` access.
+List all merge requests (MRs), regardless of state or age, and their discussions.
+Include published, non-system discussion notes, inline diff notes and replies,
+including resolved threads, created within the inclusive UTC window. Exclude
+unpublished draft review notes and system events. Do not rely on MR update
+timestamps to find recent notes; large projects can require many requests.
+
+The collector records the provider and hostname. Its existing `pr` field holds
+the PR or MR number. Treat each distinct PR/MR as one review occurrence when
+counting themes. It reads root and nested AGENTS.md / CLAUDE.md, excluding
+generated and dependency folders. Notes support interpretation; they never count
+as review occurrences.
 
 For an offline demo, supply `--fixture /path/to/fixtures/comments.json --now
-2026-10-29T12:00:00Z --root /path/to/fixtures/sample-repo`. No GitHub access is
+2026-10-29T12:00:00Z --root /path/to/fixtures/sample-repo`. No hosting access is
 needed. Preserve the fixture label in the report. Do not represent fake links as
 real feedback. The collector writes said-it-twice/evidence.json.
 
@@ -55,14 +76,15 @@ concerns and record each source ID. Exclude praise, resolved acknowledgements,
 questions without an actionable concern and copied quotations. List excluded
 items with a short reason so counts can be audited. Flag ambiguous classifications.
 
-Deduplicate IDs. Within each theme count a PR once, even if it has many comments.
-If a review body merely repeats an inline comment on the same PR, show one
+Deduplicate IDs. Within each theme count a PR/MR once, even if it has many comments.
+If a review body merely repeats an inline comment on the same PR/MR, show one
 representative example and avoid inflating the comment count. Track both unique
-PR count and independent comment count, with source IDs for each theme.
-A recurring theme requires at least two distinct PRs. Single-PR concerns may be
-listed separately but must not enter the recurring ranking. Rank by distinct PRs,
-then independent comments, then stable alphabetical theme name. Notes alone cannot
-establish recurrence. State the window, counting method and confidence explicitly.
+PR/MR count and independent comment count, with source IDs for each theme.
+A recurring theme requires at least two distinct PRs/MRs. Concerns from a single
+PR/MR may be listed separately but must not enter the recurring ranking. Rank by
+distinct PRs/MRs, then independent comments, then stable alphabetical theme name.
+Notes alone cannot establish recurrence. State the window, counting method and
+confidence explicitly.
 
 ## 3. Choose enforcement
 
@@ -102,14 +124,16 @@ unless a genuinely isolated validation within said-it-twice/ was performed.
 
 Report format:
 
-- Repository, fixture/live mode, UTC window, coverage and exclusions.
-- A ranked table: theme, distinct PRs, independent comments, confidence, proposed
+- Repository, provider, hostname, fixture/live mode, UTC window, coverage and
+  exclusions.
+- A ranked table: theme, distinct PRs/MRs, independent comments, confidence, proposed
   check, patch link or reason unavailable.
-- For each theme: invariant, representative quotes with comment/PR URLs and IDs,
+- For each theme: invariant, representative quotes with comment/PR/MR URLs and IDs,
   all supporting IDs, existing note paths and relevant scopes, chosen enforcement,
   reason earlier options do not fit, cost/false-positive tradeoff, patch path,
   validation performed and pending validation.
-- Single-PR concerns, ambiguous/excluded evidence and collection limitations.
+- Concerns from a single PR/MR, ambiguous/excluded evidence and collection
+  limitations.
 
 When a patch is unsafe or needs context, give a precise proposal and state what
 is missing instead of fabricating code. For a written-rule fallback, provide an

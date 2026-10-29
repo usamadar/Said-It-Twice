@@ -1,10 +1,10 @@
 {
   "name": "said-it-twice",
-  "version": "0.1.0",
-  "description": "Turn repeated PR review feedback into proposed automated checks.",
+  "version": "0.2.0",
+  "description": "Turn repeated GitHub or GitLab review feedback into proposed automated checks.",
   "author": {"name": "Usama Dar"},
   "homepage": "https://github.com/usamadar/Said-It-Twice",
   "repository": "https://github.com/usamadar/Said-It-Twice",
   "license": "MIT",
-  "keywords": ["code-review", "automation", "checks", "codex"]
+  "keywords": ["code-review", "automation", "checks", "codex", "github", "gitlab"]
 }
